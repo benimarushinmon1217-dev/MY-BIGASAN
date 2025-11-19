@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Bigasan POS — Web</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicon (tab icon) – change the file name to your own logo if you like -->
+  <link rel="icon" type="image/png" href="BIGASAN.png">
+
+  <!-- Chart.js for dashboard graphs (needs internet) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-main: #020617;
+      --bg-panel: #020617;
+      --bg-panel-soft: #020617;
+      --border-soft: rgba(148,163,184,0.4);
+      --accent: #0ea5e9;
+      --accent-soft: rgba(56,189,248,0.18);
+      --accent-strong: rgba(56,189,248,0.35);
+      --danger: #ef4444;
+      --danger-soft: rgba(248,113,113,0.18);
+      --text-main: #e5e7eb;
+      --text-dim: #9ca3af;
+      --text-soft: #64748b;
+      --shadow-soft: 0 22px 60px rgba(15,23,42,0.85);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-main);
+      background: radial-gradient(circle at top left, #0f172a, #020617 55%, #020617);
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+
+    header {
+      height: 64px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: radial-gradient(circle at 0% 0%, #0f172a, #020617 42%, #020617);
+      border-bottom: 1px solid rgba(15,23,42,0.85);
+      box-shadow: 0 14px 40px rgba(15,23,42,0.9);
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 14px;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 1px rgba(148,163,184,0.7),
+        0 0 22px rgba(56,189,248,0.9);
+      background: radial-gradient(circle at 20% 0%, #facc15, transparent 55%),
+                  radial-gradient(circle at 80% 100%, #0ea5e9, transparent 60%),
+                  #020617;
+    }
+    .header-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .header-title-main {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .header-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .header-right {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    /* MAIN LAYOUT */
+
+    main {
+      flex: 1;
+      overflow: auto;
+      padding: 18px 24px 22px;
+    }
+
+    .app-grid {
+      max-width: 1480px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.6fr);
+      gap: 22px;
+      align-items: flex-start;
+    }
+
+    .col-left,
+    .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* PANELS */
+
+    .panel {
+      background:
+        radial-gradient(circle at 0% 0%, rgba(15,23,42,0.92), transparent 45%),
+        radial-gradient(circle at 100% 0%, rgba(8,47,73,0.78), transparent 55%),
+        linear-gradient(145deg, #020617, #020617 42%, #020617);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(30,64,175,0.7);
+      box-shadow: var(--shadow-soft);
+      padding: 14px 18px 14px;
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-align: right;
+    }
+
+    /* FORM ELEMENTS */
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .row-inline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .field {
+      flex: 1 1 0;
+      min-width: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-button {
+      justify-content: flex-end;
+    }
+
+    label {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select {
+      height: 32px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 0 10px;
+      font-size: 12px;
+      color: var(--text-main);
+      background: radial-gradient(circle at 0 0, rgba(15,23,42,0.6), transparent 40%),
+                  #020617;
+      outline: none;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    input::placeholder {
+      color: var(--text-soft);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.4);
+      background:
+        radial-gradient(circle at 0 0, rgba(56,189,248,0.12), transparent 40%),
+        #020617;
+    }
+
+    select {
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #9ca3af 50%),
+                        linear-gradient(135deg, #9ca3af 50%, transparent 50%);
+      background-position:
+        calc(100% - 12px) 11px,
+        calc(100% - 8px) 11px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 26px;
+    }
+
+    /* BUTTONS */
+
+    button {
+      border-radius: var(--radius-pill);
+      border: none;
+      height: 32px;
+      padding: 0 18px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: none;
+      cursor: pointer;
+      background: radial-gradient(circle at 0 0, rgba(248,250,252,0.3), transparent 45%),
+                  linear-gradient(135deg, #0ea5e9, #22c1c3);
+      color: #0b1120;
+      box-shadow:
+        0 14px 30px rgba(8,47,73,0.9),
+        0 0 0 1px rgba(56,189,248,0.65);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      box-shadow:
+        0 18px 40px rgba(8,47,73,0.95),
+        0 0 0 1px rgba(56,189,248,0.95);
+    }
+
+    button:active {
+      transform: translateY(0);
+      filter: brightness(0.96);
+      box-shadow:
+        0 8px 22px rgba(8,47,73,0.9),
+        0 0 0 1px rgba(56,189,248,0.8);
+    }
+
+    .btn-ghost {
+      background: radial-gradient(circle at 0 0, rgba(15,23,42,0.9), transparent 50%),
+                  rgba(15,23,42,0.96);
+      color: var(--text-main);
+      box-shadow: 0 0 0 1px rgba(148,163,184,0.7);
+    }
+
+    .btn-danger {
+      background: radial-gradient(circle at 0 0, rgba(248,250,252,0.3), transparent 45%),
+                  linear-gradient(135deg, #ef4444, #f97316);
+      color: #0b1120;
+      box-shadow:
+        0 18px 36px rgba(127,29,29,0.95),
+        0 0 0 1px rgba(248,113,113,0.9);
+    }
+
+    /* TABLES */
+
+    .table-wrapper {
+      margin-top: 6px;
+      border-radius: 12px;
+      border: 1px solid rgba(30,64,175,0.7);
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), transparent 50%),
+                  rgba(15,23,42,0.98);
+      max-height: 260px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      table-layout: fixed;
+    }
+
+    thead {
+      background: linear-gradient(to right, rgba(15,23,42,0.98), rgba(15,23,42,0.95));
+    }
+
+    thead th {
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(30,64,175,0.7);
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+
+    tbody td {
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(30,64,175,0.4);
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15,23,42,0.96);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(15,23,42,0.985);
+    }
+
+    tbody tr:hover {
+      background: rgba(15,23,42,0.96);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    /* Ledger row selection */
+
+    .table-selectable tbody tr {
+      cursor: pointer;
+    }
+
+    .table-selectable tbody tr.selected {
+      outline: 1px solid var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+      background: radial-gradient(circle at 0 0, rgba(56,189,248,0.24), transparent 55%),
+                  rgba(15,23,42,0.98);
+    }
+
+    /* Responsive stacking */
+
+    @media (max-width: 1100px) {
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div class="header-logo">
+      <!-- Change src to your own logo image -->
+      <img src="BIGASAN.png" alt="BIGASAN">
+    </div>
+    <div>
+      <div class="header-title-main">MY BIGASAN POS</div>
+      <div class="header-sub">Web version</div>
+    </div>
+  </div>
+  <div class="header-right">
+    Logged in as: you (web)
+  </div>
+</header>
+
+<main>
+  <div class="app-grid">
+    <!-- LEFT COLUMN -->
+    <div class="col-left">
+
+      <!-- SALES / POS -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Sales / POS</div>
+          <div class="panel-subtitle" id="totalsLabel">Daily: ₱ 0.00 • All-time: ₱ 0.00</div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="saleRice">Rice</label>
+            <select id="saleRice"></select>
+          </div>
+          <div class="field">
+            <label for="saleCustomer">Customer (optional)</label>
+            <input id="saleCustomer" type="text" placeholder="Customer name">
+          </div>
+          <div class="field">
+            <label for="saleKilos">Kilos</label>
+            <input id="saleKilos" type="number" min="0" step="0.01" placeholder="e.g. 5">
+          </div>
+          <div class="field field-button">
+            <button id="btnSellSingle">Sell (single)</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="salesTable">
+            <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Rice</th>
+              <th class="text-right">Kilos</th>
+              <th class="text-right">Price/kg</th>
+              <th class="text-right">Total</th>
+              <th>Sale ID</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CART / MULTI ORDER -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Cart / Multi-order</div>
+        </div>
+
+        <div class="row">
+          <button id="btnAddToCart">Add selected to cart</button>
+          <button id="btnCheckoutCart">Checkout cart</button>
+          <button id="btnClearCart" class="btn-ghost">Clear cart</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="cartTable">
+            <thead>
+            <tr>
+              <th>Rice</th>
+              <th class="text-right">Kilos</th>
+              <th class="text-right">Price/kg</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SALES FILTER & EXPORT -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Sales Filter & Export</div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="filterFrom">From</label>
+            <input type="date" id="filterFrom">
+          </div>
+          <div class="field">
+            <label for="filterTo">To</label>
+            <input type="date" id="filterTo">
+          </div>
+          <div class="field field-button">
+            <button id="btnApplyFilter">Apply Filter</button>
+          </div>
+          <div class="field field-button">
+            <button id="btnExportVisible" class="btn-ghost">Export visible CSV</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CUSTOMER LEDGER -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Customer Ledger</div>
+          <div class="panel-subtitle">Charges created from sales with a customer name</div>
+        </div>
+
+        <div class="row-inline" style="margin-bottom:8px; gap:8px;">
+          <button id="ledgerMarkPaidBtn">Mark as Paid</button>
+          <button id="ledgerMarkUnpaidBtn" class="btn-ghost">Mark as Unpaid</button>
+          <button id="ledgerRemoveBtn" class="btn-danger">Remove entry</button>
+          <button id="ledgerExportBtn" class="btn-ghost">Export ledger CSV</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="ledgerTable" class="table-selectable">
+            <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Date/Time</th>
+              <th>Type</th>
+              <th class="text-right">Amount</th>
+              <th>Reference</th>
+              <th>Notes</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-right">
+
+      <!-- INVENTORY -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Inventory</div>
+          <div class="panel-subtitle">Manage Stocks & Prices</div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="invName">Rice Name</label>
+            <input id="invName" type="text" placeholder="e.g. Dinorado">
+          </div>
+          <div class="field">
+            <label for="invStock">Stock (kg)</label>
+            <input id="invStock" type="number" min="0" step="0.01">
+          </div>
+          <div class="field">
+            <label for="invPrice">Price/kg</label>
+            <input id="invPrice" type="number" min="0" step="0.01">
+          </div>
+          <div class="field field-button">
+            <button id="btnInvAdd">Add</button>
+          </div>
+          <div class="field field-button">
+            <button id="btnInvEdit" class="btn-ghost">Edit</button>
+          </div>
+          <div class="field field-button">
+            <button id="btnInvRemove" class="btn-danger">Remove</button>
+          </div>
+          <div class="field field-button">
+            <button id="btnInvUndo" class="btn-ghost">Undo remove</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="invSearch">Search</label>
+            <input id="invSearch" type="text" placeholder="Find rice…">
+          </div>
+          <div class="field">
+            <label for="invLowStock">Low-stock threshold</label>
+            <input id="invLowStock" type="number" min="0" step="1" value="10">
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="invTable">
+            <thead>
+            <tr>
+              <th>Rice</th>
+              <th class="text-right">Stock</th>
+              <th class="text-right">Price/kg</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- AUDIT TRAIL -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Audit Trail</div>
+          <div class="panel-subtitle">Latest Actions</div>
+        </div>
+        <div class="table-wrapper">
+          <table id="auditTable">
+            <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Details</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Dashboard</div>
+          <div class="panel-subtitle">Inventory & Daily sales overview</div>
+        </div>
+        <canvas id="stockChart" height="150"></canvas>
+        <canvas id="salesChart" height="150" style="margin-top:12px;"></canvas>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  // ---- Data storage ----
+  const LS_INV    = "myb_inv";
+  const LS_SALES  = "myb_sales";
+  const LS_AUDIT  = "myb_audit";
+  const LS_LEDGER = "myb_ledger";
+
+  let inventory = JSON.parse(localStorage.getItem(LS_INV) || "{}");
+  let sales     = JSON.parse(localStorage.getItem(LS_SALES) || "[]");
+  let audit     = JSON.parse(localStorage.getItem(LS_AUDIT) || "[]");
+  let ledger    = JSON.parse(localStorage.getItem(LS_LEDGER) || "[]");
+  let cart      = [];
+  let lastRemoved = null;
+  let selectedLedgerIndex = null;
+  let currentSalesView = []; // what is currently displayed in salesTable
+
+  // Charts
+  let stockChart = null;
+  let salesChart = null;
+
+  // Utility formatting
+  function peso(n) {
+    const v = Number(n) || 0;
+    return "₱ " + v.toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function formatKilos(n) {
+    const v = Number(n) || 0;
+    return v.toFixed(2) + " kg";
+  }
+  function nowDateTime() {
+    const d = new Date();
+    const date = d.toISOString().slice(0,10); // yyyy-mm-dd
+    let hours = d.getHours();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+    const mins = String(d.getMinutes()).padStart(2,"0");
+    return {date, time:`${hours}:${mins} ${ampm}`, full:d.toLocaleString()};
+  }
+
+  function saveAll() {
+    localStorage.setItem(LS_INV, JSON.stringify(inventory));
+    localStorage.setItem(LS_SALES, JSON.stringify(sales));
+    localStorage.setItem(LS_AUDIT, JSON.stringify(audit));
+    localStorage.setItem(LS_LEDGER, JSON.stringify(ledger));
+    renderInventory();
+    renderSalesTable();
+    renderLedger();
+    renderAudit();
+    updateTotals();
+    updateCharts();
+  }
+
+  function logAudit(action, details) {
+    const ts = new Date().toLocaleString();
+    audit.unshift({
+      ts,
+      user: "you",
+      action,
+      details: details || ""
+    });
+    if (audit.length > 200) audit.length = 200;
+  }
+
+  // ---- Inventory rendering ----
+  function renderInventory() {
+    const tbody = document.querySelector("#invTable tbody");
+    tbody.innerHTML = "";
+    const search = document.getElementById("invSearch").value.trim().toLowerCase();
+    const lowLevel = Number(document.getElementById("invLowStock").value) || 0;
+
+    const names = Object.keys(inventory).sort((a,b)=>a.localeCompare(b));
+    const riceSelect = document.getElementById("saleRice");
+    riceSelect.innerHTML = "";
+
+    names.forEach(name => {
+      const item = inventory[name];
+      const stock = Number(item.stock) || 0;
+      const price = Number(item.price) || 0;
+
+      // add to dropdown
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      riceSelect.appendChild(opt);
+
+      if (search && !name.toLowerCase().includes(search)) return;
+
+      const tr = document.createElement("tr");
+      const statusTdText = (function() {
+        if (stock <= 0) return "Out of stock";
+        if (stock <= lowLevel) return "Low stock";
+        return "Fit";
+      })();
+
+      tr.innerHTML = `
+        <td>${name}</td>
+        <td class="text-right">${formatKilos(stock)}</td>
+        <td class="text-right">${peso(price)}</td>
+        <td>${statusTdText}</td>
+      `;
+
+      if (statusTdText === "Out of stock") {
+        tr.style.background = "rgba(127,29,29,0.4)";
+      } else if (statusTdText === "Low stock") {
+        tr.style.background = "rgba(202,138,4,0.18)";
+      }
+
+      tr.onclick = () => {
+        document.getElementById("invName").value  = name;
+        document.getElementById("invStock").value = stock;
+        document.getElementById("invPrice").value = price;
+        document.getElementById("saleRice").value = name;
+      };
+
+      tbody.appendChild(tr);
+    });
+
+    if (!names.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 4;
+      td.textContent = "No inventory yet.";
+      td.style.color = "#9ca3af";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  }
+
+  // ---- Sales rendering ----
+  function renderSalesTable(view) {
+    const tbody = document.querySelector("#salesTable tbody");
+    tbody.innerHTML = "";
+    currentSalesView = view || sales;
+
+    currentSalesView.forEach(s => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${s.date}</td>
+        <td>${s.time}</td>
+        <td>${s.rice}</td>
+        <td class="text-right">${formatKilos(s.kilos)}</td>
+        <td class="text-right">${peso(s.price)}</td>
+        <td class="text-right">${peso(s.total)}</td>
+        <td>${s.id}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    if (!currentSalesView.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 7;
+      td.textContent = "No sales yet.";
+      td.style.color = "#9ca3af";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  }
+
+  // ---- Ledger rendering ----
+  function renderLedger() {
+    const tbody = document.querySelector("#ledgerTable tbody");
+    tbody.innerHTML = "";
+    selectedLedgerIndex = null;
+
+    ledger.forEach((l, idx) => {
+      const tr = document.createElement("tr");
+      tr.dataset.index = idx;
+      tr.innerHTML = `
+        <td>${l.customer}</td>
+        <td>${l.datetime}</td>
+        <td>${l.type}</td>
+        <td class="text-right">${peso(l.amount)}</td>
+        <td>${l.ref}</td>
+        <td>${l.notes}</td>
+        <td>${l.status}</td>
+      `;
+      tr.onclick = () => {
+        selectedLedgerIndex = idx;
+        [...tbody.children].forEach(r => r.classList.remove("selected"));
+        tr.classList.add("selected");
+      };
+      tbody.appendChild(tr);
+    });
+
+    if (!ledger.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 7;
+      td.textContent = "No ledger entries yet.";
+      td.style.color = "#9ca3af";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  }
+
+  // ---- Audit rendering ----
+  function renderAudit() {
+    const tbody = document.querySelector("#auditTable tbody");
+    tbody.innerHTML = "";
+
+    audit.forEach(a => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${a.ts}</td>
+        <td>${a.user}</td>
+        <td>${a.action}</td>
+        <td>${a.details}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    if (!audit.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 4;
+      td.textContent = "No actions yet.";
+      td.style.color = "#9ca3af";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  }
+
+  function updateTotals() {
+    let daily = 0;
+    let total = 0;
+    const today = new Date().toISOString().slice(0,10);
+    sales.forEach(s => {
+      total += s.total;
+      if (s.date === today) daily += s.total;
+    });
+    document.getElementById("totalsLabel").textContent =
+      `Daily: ${peso(daily)} • All-time: ${peso(total)}`;
+  }
+
+  // ---- Inventory actions ----
+  document.getElementById("btnInvAdd").onclick = () => {
+    const name = document.getElementById("invName").value.trim();
+    const stock = Number(document.getElementById("invStock").value);
+    const price = Number(document.getElementById("invPrice").value);
+
+    if (!name) { alert("Enter rice name."); return; }
+    if (!(stock >= 0)) { alert("Enter valid stock."); return; }
+    if (!(price >= 0)) { alert("Enter valid price."); return; }
+
+    inventory[name] = {stock, price};
+    logAudit("AddRice", name);
+    saveAll();
+  };
+
+  document.getElementById("btnInvEdit").onclick = () => {
+    const name = document.getElementById("invName").value.trim();
+    if (!name || !inventory[name]) { alert("Select an existing rice to edit."); return; }
+    const stock = Number(document.getElementById("invStock").value);
+    const price = Number(document.getElementById("invPrice").value);
+    if (!(stock >= 0) || !(price >= 0)) { alert("Invalid stock or price."); return; }
+    inventory[name] = {stock, price};
+    logAudit("EditRice", name);
+    saveAll();
+  };
+
+  document.getElementById("btnInvRemove").onclick = () => {
+    const name = document.getElementById("invName").value.trim();
+    if (!name || !inventory[name]) { alert("Select a rice to remove."); return; }
+    if (!confirm(`Remove ${name} from inventory?`)) return;
+    lastRemoved = {name, data: inventory[name]};
+    delete inventory[name];
+    logAudit("RemoveRice", name);
+    saveAll();
+  };
+
+  document.getElementById("btnInvUndo").onclick = () => {
+    if (!lastRemoved) { alert("Nothing to undo."); return; }
+    inventory[lastRemoved.name] = lastRemoved.data;
+    logAudit("UndoRemove", lastRemoved.name);
+    lastRemoved = null;
+    saveAll();
+  };
+
+  document.getElementById("invSearch").oninput = renderInventory;
+  document.getElementById("invLowStock").oninput = renderInventory;
+
+  // ---- Sales: single sale ----
+  function performSale(riceName, kilos, customer, sharedOrderId) {
+    if (!inventory[riceName]) {
+      alert(`"${riceName}" not found in inventory.`);
+      return false;
+    }
+    const inv = inventory[riceName];
+    const available = Number(inv.stock) || 0;
+    let k = Number(kilos);
+    if (!(k > 0)) {
+      alert("Enter a valid kilos value.");
+      return false;
+    }
+
+    if (available <= 0) {
+      alert(`${riceName} is out of stock.`);
+      return false;
+    }
+    if (k > available) {
+      const ok = confirm(
+        `Only ${formatKilos(available)} of ${riceName} available (requested ${formatKilos(k)}).\n` +
+        `Sell the available quantity instead?`
+      );
+      if (!ok) return false;
+      k = available;
+    }
+
+    const price = Number(inv.price) || 0;
+    const total = price * k;
+    inv.stock = available - k;
+
+    const dt = nowDateTime();
+    const saleId = sharedOrderId || crypto.randomUUID();
+
+    const rec = {
+      date: dt.date,
+      time: dt.time,
+      rice: riceName,
+      kilos: k,
+      price,
+      total,
+      id: saleId
+    };
+    sales.push(rec);
+
+    if (customer) {
+      ledger.push({
+        customer,
+        datetime: dt.full,
+        type: "Charge",
+        amount: total,
+        ref: saleId,
+        notes: `${riceName} ${formatKilos(k)} @ ${peso(price)}`,
+        status: "Unpaid"
+      });
+    }
+
+    logAudit(sharedOrderId ? "SellMulti" : "SellSingle", `${riceName} ${formatKilos(k)} → ${peso(total)}`);
+    return {total};
+  }
+
+  document.getElementById("btnSellSingle").onclick = () => {
+    const rice = document.getElementById("saleRice").value;
+    const kilos = Number(document.getElementById("saleKilos").value);
+    const customer = document.getElementById("saleCustomer").value.trim();
+    if (!rice) { alert("Select a rice."); return; }
+    const res = performSale(rice, kilos, customer, null);
+    if (!res) return;
+    document.getElementById("saleKilos").value = "";
+    document.getElementById("saleCustomer").value = "";
+    saveAll();
+  };
+
+  // ---- Cart actions ----
+  function renderCart() {
+    const tbody = document.querySelector("#cartTable tbody");
+    tbody.innerHTML = "";
+    cart.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.rice}</td>
+        <td class="text-right">${formatKilos(item.kilos)}</td>
+        <td class="text-right">${peso(item.price)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    if (!cart.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 3;
+      td.textContent = "Cart is empty.";
+      td.style.color = "#9ca3af";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  }
+
+  document.getElementById("btnAddToCart").onclick = () => {
+    const rice = document.getElementById("saleRice").value;
+    const kilos = Number(document.getElementById("saleKilos").value);
+    if (!rice) { alert("Select a rice."); return; }
+    if (!(kilos > 0)) { alert("Enter valid kilos."); return; }
+
+    if (!inventory[rice]) { alert("Rice not in inventory."); return; }
+    const price = Number(inventory[rice].price) || 0;
+
+    cart.push({rice, kilos, price});
+    document.getElementById("saleKilos").value = "";
+    renderCart();
+  };
+
+  document.getElementById("btnClearCart").onclick = () => {
+    cart = [];
+    renderCart();
+  };
+
+  document.getElementById("btnCheckoutCart").onclick = () => {
+    if (!cart.length) { alert("Cart is empty."); return; }
+    const customer = document.getElementById("saleCustomer").value.trim();
+
+    // quick pre-check: ensure enough stock per rice overall
+    const agg = {};
+    cart.forEach(i => {
+      agg[i.rice] = (agg[i.rice] || 0) + i.kilos;
+    });
+    for (const [rice, kilos] of Object.entries(agg)) {
+      if (!inventory[rice]) { alert(`${rice} not in inventory.`); return; }
+      const avail = Number(inventory[rice].stock) || 0;
+      if (kilos > avail) {
+        alert(`Not enough stock for ${rice}. Needed ${formatKilos(kilos)}, available ${formatKilos(avail)}.`);
+        return;
+      }
+    }
+
+    const sharedId = crypto.randomUUID();
+    let orderTotal = 0;
+    for (const item of cart) {
+      const res = performSale(item.rice, item.kilos, customer, sharedId);
+      if (!res) return;
+      orderTotal += res.total;
+    }
+
+    if (customer && orderTotal > 0) {
+      // Add a summary ledger note line as well
+      ledger.push({
+        customer,
+        datetime: new Date().toLocaleString(),
+        type: "Charge",
+        amount: 0,
+        ref: sharedId,
+        notes: `Order ${sharedId} (summary)`,
+        status: "Unpaid"
+      });
+    }
+
+    logAudit("CheckoutCart", `Order ${sharedId} → ${peso(orderTotal)}`);
+    cart = [];
+    document.getElementById("saleCustomer").value = "";
+    renderCart();
+    saveAll();
+  };
+
+  // ---- Sales filter + export ----
+  document.getElementById("btnApplyFilter").onclick = () => {
+    const from = document.getElementById("filterFrom").value;
+    const to   = document.getElementById("filterTo").value;
+    if (!from && !to) {
+      renderSalesTable(sales);
+      logAudit("FilterSales","Cleared");
+      saveAll(); // to update audit only
+      return;
+    }
+    const fromD = from ? from : "0000-00-00";
+    const toD   = to   ? to   : "9999-12-31";
+    const filtered = sales.filter(s => s.date >= fromD && s.date <= toD);
+    renderSalesTable(filtered);
+    logAudit("FilterSales", `${fromD} → ${toD}`);
+    saveAll();
+  };
+
+  document.getElementById("btnExportVisible").onclick = () => {
+    let csv = "\uFEFFDate,Time,Rice,Kilos,Price,Total,ID\n";
+    currentSalesView.forEach(s => {
+      const row = [
+        s.date,
+        s.time,
+        s.rice,
+        s.kilos,
+        s.price,
+        s.total,
+        s.id
+      ].map(v => `"${String(v).replace(/"/g,'""')}"`);
+      csv += row.join(",") + "\n";
+    });
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "sales_export.csv";
+    a.click();
+  };
+
+  // ---- Ledger controls ----
+  document.getElementById("ledgerMarkPaidBtn").onclick = () => {
+    if (selectedLedgerIndex == null) { alert("Select a ledger row first."); return; }
+    ledger[selectedLedgerIndex].status = "Paid";
+    logAudit("LedgerPaid", ledger[selectedLedgerIndex].ref || "");
+    saveAll();
+  };
+
+  document.getElementById("ledgerMarkUnpaidBtn").onclick = () => {
+    if (selectedLedgerIndex == null) { alert("Select a ledger row first."); return; }
+    ledger[selectedLedgerIndex].status = "Unpaid";
+    logAudit("LedgerUnpaid", ledger[selectedLedgerIndex].ref || "");
+    saveAll();
+  };
+
+  document.getElementById("ledgerRemoveBtn").onclick = () => {
+    if (selectedLedgerIndex == null) { alert("Select a ledger row first."); return; }
+    const entry = ledger[selectedLedgerIndex];
+    if (!confirm(`Remove ledger entry for ${entry.customer}?`)) return;
+    ledger.splice(selectedLedgerIndex, 1);
+    selectedLedgerIndex = null;
+    logAudit("LedgerRemove", entry.ref || "");
+    saveAll();
+  };
+
+  document.getElementById("ledgerExportBtn").onclick = () => {
+    let csv = "\uFEFFCustomer,DateTime,Type,Amount,Reference,Notes,Status\n";
+    ledger.forEach(l => {
+      const row = [
+        l.customer,
+        l.datetime,
+        l.type,
+        l.amount,
+        l.ref,
+        l.notes,
+        l.status
+      ].map(v => `"${String(v ?? "").replace(/"/g,'""')}"`);
+      csv += row.join(",") + "\n";
+    });
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "ledger_export.csv";
+    a.click();
+  };
+
+  // ---- Dashboard charts ----
+  function updateCharts() {
+    const invLabels = Object.keys(inventory).sort((a,b)=>a.localeCompare(b));
+    const invData   = invLabels.map(n => Number(inventory[n].stock) || 0);
+
+    const salesByDate = {};
+    sales.forEach(s => {
+      salesByDate[s.date] = (salesByDate[s.date] || 0) + s.total;
+    });
+    const dates = Object.keys(salesByDate).sort();
+    const salesData = dates.map(d => salesByDate[d]);
+
+    const stockCtx = document.getElementById("stockChart").getContext("2d");
+    const salesCtx = document.getElementById("salesChart").getContext("2d");
+
+    if (stockChart) stockChart.destroy();
+    if (salesChart) salesChart.destroy();
+
+    stockChart = new Chart(stockCtx, {
+      type: "bar",
+      data: {
+        labels: invLabels,
+        datasets: [{
+          label: "Stock (kg)",
+          data: invData
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {display: false}
+        },
+        scales: {
+          x: {ticks:{color:"#9ca3af"}},
+          y: {ticks:{color:"#9ca3af"}}
+        }
+      }
+    });
+
+    salesChart = new Chart(salesCtx, {
+      type: "line",
+      data: {
+        labels: dates,
+        datasets: [{
+          label: "Daily sales",
+          data: salesData,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend:{display:false}
+        },
+        scales: {
+          x:{ticks:{color:"#9ca3af"}},
+          y:{ticks:{color:"#9ca3af"}}
+        }
+      }
+    });
+  }
+
+  // ---- Initial render ----
+  (function init() {
+    renderInventory();
+    renderSalesTable();
+    renderLedger();
+    renderAudit();
+    renderCart();
+    updateTotals();
+    updateCharts();
+  })();
+</script>
+</body>
+</html>
