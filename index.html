@@ -375,6 +375,49 @@
       .app-grid {
         grid-template-columns: 1fr;
       }
+    /* ---------- Mobile / small-screen tweaks ---------- */
+@media (max-width: 900px) {
+  body {
+    font-size: 14px;
+  }
+
+  .panel {
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+
+  /* Tables: allow horizontal scroll instead of squishing */
+  .panel table {
+    display: block;                /* so we can scroll the whole table */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .panel table thead,
+  .panel table tbody,
+  .panel table tr,
+  .panel table th,
+  .panel table td {
+    white-space: nowrap;           /* keep values on one line */
+  }
+
+  .panel table th,
+  .panel table td {
+    padding: 4px 8px;              /* a bit tighter on mobile */
+    font-size: 11px;
+  }
+
+  /* Optional: shrink the header text so it doesn’t wrap weirdly */
+  .header-title h1 {
+    font-size: 18px;
+  }
+
+  .header-sub {
+    font-size: 11px;
+  }
+}
+
     }
   </style>
 </head>
@@ -1227,4 +1270,5 @@
 </script>
 </body>
 </html>
+
 
